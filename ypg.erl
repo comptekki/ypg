@@ -1,6 +1,6 @@
 %%%-------------------------------------------------------------------
 %%% Created :  by comptekki May 20, 2010 (Original by Torbjorn Tornkvist <tobbe@tornkvist.org>)
-%%% Desc.   : A naive Mnesia table viewer Yaws-app interface.
+%%% Desc.   : A postgresql table viewer Yaws-app interface.
 %%%
 %%% @author comptekki
 %%%
