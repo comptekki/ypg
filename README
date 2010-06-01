@@ -1,0 +1,36 @@
+ypg.erl - Version 1.0
+==============
+a modified version of ymnesia.erl to work with postgresql
+
+ymnesia.erl is found in the yaws source
+
+yaws, erlang based web server, is found at:
+
+http://yaws.hyber.org/
+
+ypg uses ajax to show results of table searches
+
+Setup
+==============
+In the yaws.conf, add the appmods line for ypg:
+
+<server localhost>
+        port = 8080
+        listen = 127.0.0.1
+        docroot = /usr/local/var/yaws/www
+        appmods = <ypg, ypg>
+        appmods = <cgi-bin, yaws_appmod_cgi>        
+</server>
+
+Requirements
+==============
+
+1. jquery
+2. http://code.google.com/p/erlang-psql-driver/
+3. create ypg.hrl with this information filled out properly:
+
+-define(HOST, "localhost").
+-define(DB, "").
+-define(USERNAME, "").
+-define(PASSWORD, "").
+-define(JQUERY, "/static/jquery-1.4.2.min.js").
