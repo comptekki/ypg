@@ -4,7 +4,7 @@ a modified version of ymnesia.erl to work with postgresql
 
 ymnesia.erl is found in the yaws source
 
-yaws, erlang based web server, is found at:
+yaws, an erlang based web server, is found at:
 
 http://yaws.hyber.org/
 
