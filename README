@@ -27,7 +27,8 @@ Requirements
 
 1. jquery
 2. http://code.google.com/p/erlang-psql-driver/
-3. create ypg.hrl with this information filled out properly:
+3. A browser that supports the HTML5 slider widget
+4. create ypg.hrl with this information filled out properly:
 
 -define(HOST, "localhost").
 -define(DB, "").
