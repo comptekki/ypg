@@ -12,7 +12,7 @@ ypg uses ajax to show results of table searches
 
 Setup
 ==============
-In the yaws.conf, add the appmods line for ypg:
+In yaws.conf, add the appmods line for ypg:
 
 <server localhost>
         port = 8080
