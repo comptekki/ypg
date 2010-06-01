@@ -1,8 +1,8 @@
 %%%-------------------------------------------------------------------
-%%% Created :  May 20, 2010 (Original by Torbjorn Tornkvist <tobbe@tornkvist.org>)
+%%% Created :  by comptekki May 20, 2010 (Original by Torbjorn Tornkvist <tobbe@tornkvist.org>)
 %%% Desc.   : A naive Mnesia table viewer Yaws-app interface.
 %%%
-%%% @author 
+%%% @author comptekki
 %%%
 %%% @doc ypg is a Yaws appmod to view/search postgresql tables.
 %%%      Add <b>ypg</b> as an appmod to your Yaws configuration.
@@ -19,7 +19,7 @@
 %%%
 %%%          appmods = <ypg, ypg>
 %%%
-%%%      then point your browser to:  http://&lt;host>/ypg/
+%%%      then point your browser to:  http://hostname/ypg/
 %%%      </p>
 %%% @end
 %%%
