@@ -38,13 +38,14 @@
 -define(elog(X,Y), error_logger:info_msg("*elog ~p:~p: " X,
                                          [?MODULE, ?LINE | Y])).
 
-% http://localhost/p/?tablename=page_count&count=&date=&time=
+% http://localhost/" ++ ServerPath ++ "/?tablename=page_count&count=&date=&time=
 
 %select tablename from pg_tables where schemaname='public'
 %select column_name from information_schema.columns where table_name ='page_count'
 
 %%% @private
 out(A) ->
+	ServerPath=string:strip(A#arg.server_path, both, $/),
 	case has_query(A) of
 		true ->
 			L = yaws_api:parse_query(A),
@@ -57,9 +58,9 @@ out(A) ->
 			Ls = select_fields(Rest),
 			Sp = (catch select_pattern(Name, Ls)),
 			SpOffset = Sp ++ " offset " ++ Offset ++ " limit " ++ Rpp,
-			table(Cbox, Sp, SpOffset, l2a(Name), list_to_integer(Rpp));
+			table(Cbox, Sp, SpOffset, l2a(Name), list_to_integer(Rpp), ServerPath);
 		false ->
-		   return_top_page()
+		   return_top_page(ServerPath)
 	end.
 
 has_query(A) ->
@@ -79,12 +80,12 @@ select_pattern(Name, []) ->
 	"select * from " ++ Name;
 	
 select_pattern(Name, Ls) ->
-io:format("~nName: ~p~nLs: ~p~n", [Name,Ls]),
+%io:format("~nName: ~p~nLs: ~p~n", [Name,Ls]),
 		S=lists:flatten([" and " ++ Field ++ "::text like '%" ++ Value ++ "%'" || {Field, Value} <- Ls]),
 		S2=fun(" and " ++ Rest) -> Rest end,
 	"select * from " ++ Name ++ " where " ++ S2(S).
 
-return_top_page() ->
+return_top_page(ServerPath) ->
     {ehtml,
      [{head, [],
        [meta() ++
@@ -92,7 +93,7 @@ return_top_page() ->
         js()
         ]},
       {body, [],
-       mk_table_tab(10,0)}]}.
+       mk_table_tab(10,0, ServerPath)}]}.
 
 meta() ->
     [{pre_html, 
@@ -116,17 +117,16 @@ js() ->
 	[{script, [{type, "text/javascript"}, {src, ?JQUERY}], ""},
 	{script, [{type, "text/javascript"}], "$(document).ready(function() {$(':input:text:first').focus()})"}].
 		
-js2(Table) ->
+js2(Table, ServerPath) ->
 		{script,
 			[{type, "text/javascript"}],
 				"$(document).ready(
 					function() {
-						$('#" ++ a2l(Table) ++"').click(function() {" ++
-							  "
+						$('#" ++ a2l(Table) ++"').click(function() {
 							$('#range_input').val(10);
 							$('#offset').val(0)
 							  $.ajax({
-								   url: '/p/',
+								   url: '/" ++ ServerPath ++ "/',
 								   type: 'GET',
 								   data: 'tablename=" ++ a2l(Table) ++ setfields(Table) ++ ",
 								   success: function(data) {
@@ -149,7 +149,7 @@ setfields(Table) ->
     	end,
     	get_columns(Table)) ++ "''".
 	
-js3(Table) ->
+js3(Table, ServerPath) ->
 		{script,
 			[{type, "text/javascript"}],
 			%%
@@ -161,7 +161,7 @@ js3(Table) ->
 						function() {
 							$('#" ++ a2l(Col) ++ "').keyup(function() {" ++
 							  "$.ajax({
-								  url: '/p/',
+								  url: '/" ++ ServerPath ++ "/',
 								  type: 'GET',
 								  data: 'tablename=" ++ a2l(Table) ++ setfields(Table) ++ ",
 								  success: function(data) {
@@ -178,7 +178,7 @@ js3(Table) ->
 						function() {
 							$('#cbox_" ++ a2l(Col) ++ "').click(function() {
 							  $.ajax({
-								  url: '/p/',
+								  url: '/" ++ ServerPath ++ "/',
 								  type: 'GET',
 								  data: 'tablename=" ++ a2l(Table) ++ setfields(Table) ++ ",
 								  success: function(data) {
@@ -198,7 +198,7 @@ js3(Table) ->
 			%%
 		}.         
 %%% Build the result page.
-table(Cbox, Sp, SpOffset, Table, RowsPerPage) ->
+table(Cbox, Sp, SpOffset, Table, RowsPerPage, ServerPath) ->
         {Q, Result} = do_query(SpOffset),
         {_, Res2} = do_query(Sp),
 		Count=length(Res2),
@@ -210,7 +210,7 @@ table(Cbox, Sp, SpOffset, Table, RowsPerPage) ->
 				Vp = view_pattern(Cbox, map(fun(X) -> a2l(X) end, Headers)),
 				Nav={table, [],
 						{tr, [],
-							mk_nav(Count, RowsPerPage, Table)
+							mk_nav(Count, RowsPerPage, Table, ServerPath)
 						}
 					},
 					{ehtml,
@@ -249,7 +249,7 @@ table(Cbox, Sp, SpOffset, Table, RowsPerPage) ->
 										$('#range_input_view').click().mouseup(
 											function() {
 												$.ajax({
-													  url: '/p/',
+													  url: '/" ++ ServerPath ++ "/',
 													  type: 'GET',
 													  data: 'tablename=" ++ a2l(Table) ++ setfields(Table) ++ ",
 													  success: function(data) {
@@ -284,7 +284,7 @@ table(Cbox, Sp, SpOffset, Table, RowsPerPage) ->
 					   ]}
 		end.	
 
-mk_nav(Count, RowsPerPage, Table) ->
+mk_nav(Count, RowsPerPage, Table, ServerPath) ->
 	Ni=Count div RowsPerPage,
 	Nd=Count rem RowsPerPage,
 	
@@ -296,16 +296,16 @@ mk_nav(Count, RowsPerPage, Table) ->
 		true -> NavL = 10;
 		_ -> NavL = Nii
 	end,
-	build_nav(1, NavL, RowsPerPage, Table).
+	build_nav(1, NavL, RowsPerPage, Table, ServerPath).
 
-build_nav(Start, End, RowsPerPage, Table) ->
+build_nav(Start, End, RowsPerPage, Table, ServerPath) ->
 
 	case Start==End of
 		false -> 
 			[{td, [], {a, [{href, "javascript:void(0);"}, {id, Start},
 				{onclick, "$('#offset').val(" ++ io_lib:format("~p",[(Start-1)*RowsPerPage]) ++");
 			$.ajax({
-				 url: '/p/',
+				 url: '/" ++ ServerPath ++ "/',
 				 type: 'GET',
 				 data: 'tablename=" ++ a2l(Table) ++ setfields(Table) ++ ",
 				 success: function(data) {
@@ -316,12 +316,12 @@ build_nav(Start, End, RowsPerPage, Table) ->
 				 }
 		   });$(':input:text:first').focus();
 			
-			"}], [io_lib:format("~p",[Start])]}} | build_nav(Start+1,End, RowsPerPage, Table)];
+			"}], [io_lib:format("~p",[Start])]}} | build_nav(Start+1,End, RowsPerPage, Table, ServerPath)];
 		_ -> {td, [], {a, [{href, "javascript:void(0);"}, {id, Start}, 
 			{onclick, "$('#offset').val(" ++ io_lib:format("~p",[(Start-1)*RowsPerPage]) ++");
 		
 			$.ajax({
-				 url: '/p/',
+				 url: '/" ++ ServerPath ++ "/',
 				 type: 'GET',
 				 data: 'tablename=" ++ a2l(Table) ++ setfields(Table) ++ ",
 				 success: function(data) {
@@ -351,7 +351,7 @@ do_query(Sp) ->
 %%% Create a table of: Table | Table-attribute-1 | ... | Table-attribute-N
 %%% where each table is a Form
 
-mk_table_tab(RowsPerPage, Offset) ->
+mk_table_tab(RowsPerPage, Offset, ServerPath) ->
 	Tables=get_tables(),
     [{input, [{id, "range_input"}, {type, "hidden"}, {value, RowsPerPage}]}, {input, [{id, "offset"}, {type, "hidden"}, {value, Offset}]},
     
@@ -361,8 +361,8 @@ mk_table_tab(RowsPerPage, Offset) ->
 					Tab=Table,
                     {tr, [], 
                      [
-                    js2(Table),
-                    js3(Table),
+                    js2(Table, ServerPath),
+                    js3(Table, ServerPath),
                       {td, [], sublnk(Tab)} |
                       	mk_input_fields(Tab)
                     
@@ -474,11 +474,11 @@ max(X,Y) when X>Y   -> X;
 max(X,Y) when X=< Y -> Y.
 
 
-a2l(A) when atom(A) -> atom_to_list(A);
-a2l(L) when list(L) -> L.
+a2l(A) when is_atom(A) -> atom_to_list(A);
+a2l(L) when is_list(L) -> L.
 
-l2a(L) when list(L) -> list_to_atom(L);
-l2a(A) when atom(A) -> A.
+l2a(L) when is_list(L) -> list_to_atom(L);
+l2a(A) when is_atom(A) -> A.
 
 lk(Key, L) ->
     {value, {_,Val}} = lists:keysearch(Key, 1, L),
