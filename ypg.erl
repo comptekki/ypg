@@ -449,8 +449,19 @@ sublnk(E) ->
     {a, [{href, "javascript:void(0);"}, {id, E}],
      [E]}.
                
-massage(W) ->
-    lists:flatten(io_lib:format("~p",[W])).
+%massage(W) ->
+%    doformat(lists:flatten(io_lib:format("~p",[W]))).
+    
+massage({A,B,C}) ->
+	case A > 23 of
+		true ->
+			io_lib:format("~n~p-~2..0B-~2..0B", [A,B,C]);
+		false ->
+			io_lib:format("~n~2..0B:~2..0B:~2..0B", [A,B,C])
+	end;
+	
+massage(A) ->
+	io_lib:format("~n~p", [A]).
    
 get_tables() ->
 	{ok, Db} = pgsql:connect(?HOST, ?DB, ?USERNAME, ?PASSWORD),
