@@ -29,7 +29,7 @@
 
 -export([out/1]).
 
--import(lists, [map/2, foldl/3, reverse/1]).
+-import(lists, [map/2, foldl/3, reverse/1, flatten/1]).
 
 -include("/usr/local/lib/yaws/include/yaws_api.hrl"). 
 -include("ypg.hrl").
@@ -159,8 +159,9 @@ js3(Table, ServerPath) ->
 					
 					$(document).ready(
 						function() {
-							$('#" ++ a2l(Col) ++ "').keyup(function() {" ++
-							  "$.ajax({
+							$('#" ++ a2l(Col) ++ "').keyup(function() {
+								$('#offset').val(0);
+							  $.ajax({
 								  url: '/" ++ ServerPath ++ "/',
 								  type: 'GET',
 								  data: 'tablename=" ++ a2l(Table) ++ setfields(Table) ++ ",
