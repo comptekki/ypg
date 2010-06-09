@@ -40,7 +40,7 @@ Requirements
 2. postgresql
 3. http://code.google.com/p/erlang-psql-driver/
 4. A browser that supports the HTML5 slider widget
-	(tested and working as of June 9, 2010: safari 5.0, chrome 5.0.x, opera 10.5x)
+	(tested and working as of June 9, 2010: safari 5.0, chrome 5.0.375.70, opera 10.53)
 5. create ypg.hrl with this information filled out properly:
 
 -define(HOST, "localhost").
