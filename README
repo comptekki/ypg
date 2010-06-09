@@ -12,15 +12,26 @@ ypg uses ajax to show results of table searches
 
 Setup
 ==============
-In yaws.conf, add the appmods line for ypg:
+
+Compile ypg.erl
+
+    erlc ypg.erl
+
+put ypg.beam in a known ebin folder in yaws.conf
+
+In yaws.conf add the appmods line for ypg:
 
 <server localhost>
         port = 8080
         listen = 127.0.0.1
         docroot = /usr/local/var/yaws/www
-        appmods = <ypg, ypg>
+        appmods = <web-path, ypg>
         appmods = <cgi-bin, yaws_appmod_cgi>        
 </server>
+
+You would then access ypg by going to:
+
+http://host/web-path
 
 Requirements
 ==============
