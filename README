@@ -43,7 +43,7 @@ Requirements
 	(tested and working as of June 9, 2010: safari 5.0, chrome 5.0.375.70, opera 10.53)
 5. create ypg.hrl with this information filled out properly:
 
--define(HOST, "localhost").
+-define(HOST, "hostname").
 -define(DB, "").
 -define(USERNAME, "").
 -define(PASSWORD, "").
