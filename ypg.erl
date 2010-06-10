@@ -6,8 +6,7 @@
 %%%
 %%% @doc ypg is a Yaws appmod to view/search postgresql tables.
 %%%      Add <b>ypg</b> as an appmod to your Yaws configuration.
-%%%      Point your browser to: &lt;url&gt;/ypg
-%%%
+%%%      
 %%%      <ul>
 %%%      <li> You can search on any text.</li>
 %%%      <li> The checkbox control if the attribute should be shown in
@@ -31,7 +30,8 @@
 
 -import(lists, [map/2, foldl/3, reverse/1, flatten/1]).
 
--include("/usr/local/lib/yaws/include/yaws_api.hrl"). 
+-include("/usr/local/lib/yaws/include/yaws_api.hrl").
+
 -include("ypg.hrl").
 
 
