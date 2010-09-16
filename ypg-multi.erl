@@ -117,18 +117,18 @@ js() ->
 	[{script, [{type, "text/javascript"}, {src, ?JQUERY}], ""},
 	{script, [{type, "text/javascript"}], "$(document).ready(function() {$(':input:text:first').focus()})"}].
 		
-js2(ServerPath) ->
+js2(Table, ServerPath) ->
 		{script,
 			[{type, "text/javascript"}],
 				"$(document).ready(
 					function() {
-						$('#page_count').click(function() {
+						$('#" ++ a2l(Table) ++"').click(function() {
 							$('#range_input').val(10);
 							$('#offset').val(0)
 							  $.ajax({
-								   url: '/" ++ ServerPath ++ "',
+								   url: '/" ++ ServerPath ++ "/',
 								   type: 'GET',
-								   data: 'tablename=page_count" ++ setfields() ++ ",
+								   data: 'tablename=" ++ a2l(Table) ++ setfields(Table) ++ ",
 								   success: function(data) {
 									   $('#data').html(data) 
 								   },
@@ -136,20 +136,20 @@ js2(ServerPath) ->
 									alert(XMLHttpRequest + ' - ' + textStatus + ' - ' + errorThrown);
 								   }
 						});
-						$('#page_count_id').focus()
+						$('#" ++ a2l(Table) ++ "_id').focus()
 				 	});
 				});"
 		}.				
 
-setfields() ->
+setfields(Table) ->
 	"' + '&rpp=' + $('#range_input').val() + "++ " '&offset=' + $('#offset').val() + " ++
     map(
     	fun(Col) -> 
     		" '&"++a2l(Col)++"=' + $('#"++a2l(Col)++"').val() + ($('#cbox_"++a2l(Col)++"').attr('checked')?'&cbox_"++a2l(Col)++"='+ $('#cbox_"++a2l(Col)++"').val():'') + "
     	end,
-    	get_columns()) ++ "''".
+    	get_columns(Table)) ++ "''".
 	
-js3(ServerPath) ->
+js3(Table, ServerPath) ->
 		{script,
 			[{type, "text/javascript"}],
 			%%
@@ -162,9 +162,9 @@ js3(ServerPath) ->
 							$('#" ++ a2l(Col) ++ "').keyup(function() {
 								$('#offset').val(0);
 							  $.ajax({
-								  url: '/" ++ ServerPath ++ "',
+								  url: '/" ++ ServerPath ++ "/',
 								  type: 'GET',
-								  data: 'tablename=page_count" ++ setfields() ++ ",
+								  data: 'tablename=" ++ a2l(Table) ++ setfields(Table) ++ ",
 								  success: function(data) {
 									  $('#data').html(data) 
 								  },
@@ -179,9 +179,9 @@ js3(ServerPath) ->
 						function() {
 							$('#cbox_" ++ a2l(Col) ++ "').click(function() {
 							  $.ajax({
-								  url: '/" ++ ServerPath ++ "',
+								  url: '/" ++ ServerPath ++ "/',
 								  type: 'GET',
-								  data: 'tablename=page_count" ++ setfields() ++ ",
+								  data: 'tablename=" ++ a2l(Table) ++ setfields(Table) ++ ",
 								  success: function(data) {
 									  $('#data').html(data) 
 								  },
@@ -194,7 +194,7 @@ js3(ServerPath) ->
 					
 					"
 				end,
-				get_columns()
+				get_columns(Table)
 				)
 			%%
 		}.         
@@ -207,7 +207,7 @@ table(Cbox, Sp, SpOffset, Table, RowsPerPage, ServerPath) ->
 			true ->
 				{ehtml, {table, [], {tr, [], {td, [], "No Data"}}}};
 			_ ->
-				Headers=get_columns(),
+				Headers=get_columns(Table),
 				Vp = view_pattern(Cbox, map(fun(X) -> a2l(X) end, Headers)),
 				Nav={table, [],
 						{tr, [],
@@ -250,9 +250,9 @@ table(Cbox, Sp, SpOffset, Table, RowsPerPage, ServerPath) ->
 										$('#range_input_view').click().mouseup(
 											function() {
 												$.ajax({
-													  url: '/" ++ ServerPath ++ "',
+													  url: '/" ++ ServerPath ++ "/',
 													  type: 'GET',
-													  data: 'tablename=page_count" ++ setfields() ++ ",
+													  data: 'tablename=" ++ a2l(Table) ++ setfields(Table) ++ ",
 													  success: function(data) {
 														  $('#data').html(data) 
 													  },
@@ -276,7 +276,7 @@ table(Cbox, Sp, SpOffset, Table, RowsPerPage, ServerPath) ->
 						]},
 					   {'div', [],
 							[
-								{table, [], {tr, [], {td, [], {p, [], "Table: page_count"}}}},
+								{table, [], {tr, [], {td, [], {p, [], "Table: "++a2l(Table)}}}},
 								Nav
 							]
 					   } |
@@ -306,9 +306,9 @@ build_nav(Start, End, RowsPerPage, Table, ServerPath) ->
 			[{td, [], {a, [{href, "javascript:void(0);"}, {id, Start},
 				{onclick, "$('#offset').val(" ++ io_lib:format("~p",[(Start-1)*RowsPerPage]) ++");
 			$.ajax({
-				 url: '/" ++ ServerPath ++ "',
+				 url: '/" ++ ServerPath ++ "/',
 				 type: 'GET',
-				 data: 'tablename=page_count" ++ setfields() ++ ",
+				 data: 'tablename=" ++ a2l(Table) ++ setfields(Table) ++ ",
 				 success: function(data) {
 					 $('#data').html(data) 
 				 },
@@ -322,9 +322,9 @@ build_nav(Start, End, RowsPerPage, Table, ServerPath) ->
 			{onclick, "$('#offset').val(" ++ io_lib:format("~p",[(Start-1)*RowsPerPage]) ++");
 		
 			$.ajax({
-				 url: '/" ++ ServerPath ++ "',
+				 url: '/" ++ ServerPath ++ "/',
 				 type: 'GET',
-				 data: 'tablename=page_count" ++ setfields() ++ ",
+				 data: 'tablename=" ++ a2l(Table) ++ setfields(Table) ++ ",
 				 success: function(data) {
 					 $('#data').html(data) 
 				 },
@@ -353,28 +353,31 @@ do_query(Sp) ->
 %%% where each table is a Form
 
 mk_table_tab(RowsPerPage, Offset, ServerPath) ->
-%	Tables=get_tables(),
+	Tables=get_tables(),
     [{input, [{id, "range_input"}, {type, "hidden"}, {value, RowsPerPage}]}, {input, [{id, "offset"}, {type, "hidden"}, {value, Offset}]},
     
     {'div', [],
-      {table, [],        
+      {table, [],
+        map(fun(Table) ->
+					Tab=Table,
                     {tr, [], 
                      [
-                    js2(ServerPath),
-                    js3(ServerPath),
-                      {td, [], sublnk()} |
-                      	mk_input_fields()
+                    js2(Table, ServerPath),
+                    js3(Table, ServerPath),
+                      {td, [], sublnk(Tab)} |
+                      	mk_input_fields(Tab)
+                    
                     ]
                    }
-            }
+            end, Tables)}
        },
      {'div', [{id, "data"}]}
     ].
 
 %%% Create each table cell; consisting of the attribute name and an input field.
-mk_input_fields() ->
-    As = get_columns(),
-    Max = 4,
+mk_input_fields(Table) ->
+    As = get_columns(Table),
+    Max = max_noof_attrs(),
     map(fun(0) ->
                 {td, [], []};
            (Attribute) ->
@@ -443,9 +446,9 @@ vp(Vp, [_|T], N)     -> vp(Vp, T, N+1);
 vp([], [], _)        -> [].
 
 %%% Create a link that submit the form: onclick
-sublnk() -> 
-    {a, [{href, "javascript:void(0);"}, {id, "page_count"}],
-     ["page_count"]}.
+sublnk(E) -> 
+    {a, [{href, "javascript:void(0);"}, {id, E}],
+     [E]}.
                
 %massage(W) ->
 %    doformat(lists:flatten(io_lib:format("~p",[W]))).
@@ -461,24 +464,26 @@ massage({A,B,C}) ->
 massage(A) ->
 	io_lib:format("~n~p", [A]).
    
-%get_tables() ->
-%	{ok, Db} = pgsql:connect(?HOST, ?DB, ?USERNAME, ?PASSWORD),
-%	{_,[{_,_,Res}]}=pgsql:squery(Db, "select tablename from pg_tables where schemaname='public'"),
-%	io:format("~n~p~n",[Res]),
+get_tables() ->
+	{ok, Db} = pgsql:connect(?HOST, ?DB, ?USERNAME, ?PASSWORD),
+	{_,[{_,_,Res}]}=pgsql:squery(Db, "select tablename from pg_tables where schemaname='public'"),
+	pgsql:terminate(Db),
+	Res.
 
-%	pgsql:terminate(Db),
-%	Res
-%%	[[<<"page_count">>]].
+get_columns(Table) ->
+	{ok, Db} = pgsql:connect(?HOST, ?DB, ?USERNAME, ?PASSWORD),
+	{_,[{_,_,Res}]}=pgsql:squery(Db, "select column_name from information_schema.columns where table_name ='" ++ a2l(Table) ++ "'"),
+	pgsql:terminate(Db),
+	lists:map(fun([Col]) -> l2a(Col) end, Res).
 
-get_columns() ->
-%	{ok, Db} = pgsql:connect(?HOST, ?DB, ?USERNAME, ?PASSWORD),
-%	{_,[{_,_,Res}]}=pgsql:squery(Db, "select column_name from information_schema.columns where table_name ='" ++ a2l(Table) ++ "'"),
-%	pgsql:terminate(Db),
-%	A=lists:map(fun([Col]) -> l2a(Col) end, Res),
-%	io:format("~n~p~n",[A]),
-%	A.
 
-	[page_count_id,page_count_count,page_count_pdate,page_count_ptime].
+max_noof_attrs() ->
+    foldl(fun(Table, Max) ->
+                  max(length(get_columns(Table)), Max)
+          end, 0, get_tables()).
+
+max(X,Y) when X>Y   -> X;
+max(X,Y) when X=< Y -> Y.
 
 
 a2l(A) when is_atom(A) -> atom_to_list(A);
