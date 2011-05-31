@@ -43,8 +43,17 @@ Requirements
 	(tested and working as of June 9, 2010: safari 5.0, chrome 5.0.375.70, opera 10.53)
 5. create ypg.hrl with this information filled out properly:
 
+% postgres connection info
+
 -define(HOST, "hostname").
 -define(DB, "").
 -define(USERNAME, "").
 -define(PASSWORD, "").
+
+% jQuery location in YAWS root www folder, i.e. create static folder in /usr/local/var/yaws/www
+
 -define(JQUERY, "/static/jquery-1.4.2.min.js").
+
+% YAWS api location (exemple below)
+
+-include("/usr/local/lib/yaws/include/yaws_api.hrl").
