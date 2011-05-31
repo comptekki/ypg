@@ -30,8 +30,6 @@
 
 -import(lists, [map/2, foldl/3, reverse/1, flatten/1]).
 
--include("/usr/local/lib/yaws/include/yaws_api.hrl").
-
 -include("ypg.hrl").
 
 
@@ -344,9 +342,11 @@ view_pattern(Cs, [_|T], N)           -> view_pattern(Cs, T, N+1);
 view_pattern([], [], _)              -> [].
 
 do_query(Sp) ->
-	{ok, Db} = pgsql:connect(?HOST, ?DB, ?USERNAME, ?PASSWORD),
-	{_,[{_,_,Res}]}=pgsql:squery(Db, Sp),
-	pgsql:terminate(Db),
+	{ok, Db} = pgsql:connect(?HOST, ?USERNAME, ?PASSWORD, [{database, ?DB}]),
+	{_,_,Res}=pgsql:squery(Db, Sp),
+%	io:format("~p~n",[Res]),
+%	{_,[{_,_,Res}]}=pgsql:squery(Db, Sp),
+	pgsql:close(Db),
 	{Sp, Res}.
 	
 %%% Create a table of: Table | Table-attribute-1 | ... | Table-attribute-N
@@ -427,7 +427,7 @@ mk_tab(Vp, Headers, Rows) ->
           [{th, [], a2l(X)} || X <- vp(Vp,Headers)]} |
          map(fun(Row) ->
                      {tr, [],
-                      [{td, [], massage(W)} || W <- vp(Vp,Row)
+                      [{td, [], massage(W)} || W <- vp(Vp,tuple_to_list(Row))
                       ]}
              end, Rows)
         ]
@@ -459,7 +459,7 @@ massage({A,B,C}) ->
 	end;
 	
 massage(A) ->
-	io_lib:format("~n~p", [A]).
+	io_lib:format("~s", [A]).
    
 %get_tables() ->
 %	{ok, Db} = pgsql:connect(?HOST, ?DB, ?USERNAME, ?PASSWORD),
