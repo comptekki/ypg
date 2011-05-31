@@ -54,6 +54,6 @@ Requirements
 
 -define(JQUERY, "/static/jquery-1.4.2.min.js").
 
-% YAWS api location (exemple below)
+% YAWS api location (example below)
 
 -include("/usr/local/lib/yaws/include/yaws_api.hrl").
