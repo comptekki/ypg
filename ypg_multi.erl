@@ -24,7 +24,7 @@
 %%%
 %%%-------------------------------------------------------------------
 
--module(ypg).
+-module(ypg_multi).
 
 -export([out/1]).
 
@@ -477,11 +477,11 @@ get_columns(Table) ->
 
 max_noof_attrs() ->
     foldl(fun(Table, Max) ->
-                  max(length(get_columns(Table)), Max)
+                  mmax(length(get_columns(Table)), Max)
           end, 0, get_tables()).
 
-max(X,Y) when X>Y   -> X;
-max(X,Y) when X=< Y -> Y.
+mmax(X,Y) when X>Y   -> X;
+mmax(X,Y) when X=< Y -> Y.
 
 
 a2l(A) when is_atom(A) -> atom_to_list(A);
