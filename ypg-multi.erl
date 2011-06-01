@@ -30,8 +30,6 @@
 
 -import(lists, [map/2, foldl/3, reverse/1, flatten/1]).
 
--include("/usr/local/lib/yaws/include/yaws_api.hrl").
-
 -include("ypg.hrl").
 
 
